@@ -3,107 +3,244 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2e7d32">
+<meta name="theme-color" content="#f5f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1411" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Einkauf">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Einkaufsplaner</title>
 <style>
   :root {
-    --bg: #f4f6f4; --card: #fff; --text: #1d261d; --muted: #6b786b; --line: #dde3dd;
-    --accent: #2e7d32; --accent-text: #fff; --warn: #fff3e0; --warn-line: #ffb74d;
+    --bg: #f5f3ee; --surface: #fff; --surface-2: #faf8f4; --ink: #17221b; --muted: #6f7a72; --line: #e8e4db;
+    --accent: #1e6b45; --accent-ink: #fff; --lime: #c6f06a; --warn-bg: #fff4e0; --warn-line: #f3c47a;
+    --shadow: 0 1px 2px rgba(23,34,27,.05), 0 6px 20px rgba(23,34,27,.06);
+    --r: 20px;
+    color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #121612; --card: #1c231c; --text: #e8efe8; --muted: #93a193; --line: #2e382e;
-      --accent: #66bb6a; --accent-text: #0d1a0d; --warn: #3a2d14; --warn-line: #8a6420;
+      --bg: #0f1411; --surface: #18201b; --surface-2: #1d2620; --ink: #eef3ef; --muted: #93a197; --line: #29332d;
+      --accent: #7bd88f; --accent-ink: #0b1a10; --warn-bg: #2c2414; --warn-line: #8a6526;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+      color-scheme: dark;
     }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; background: var(--bg); color: var(--text);
-    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
-  header { position: sticky; top: 0; z-index: 5; background: var(--accent); color: var(--accent-text);
-    padding: calc(10px + env(safe-area-inset-top)) 16px 10px; display: flex; gap: 10px; align-items: center; }
-  header h1 { font-size: 18px; margin: 0; flex: 1; }
-  header select { max-width: 55%; font: inherit; padding: 6px 8px; border-radius: 8px; border: 0; }
-  main { padding: 12px 16px; max-width: 640px; margin: 0 auto; }
-  button { font: inherit; color: inherit; cursor: pointer; }
-  .btn { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
-  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-  .btn.danger { color: #c62828; }
-  .btn.small { padding: 6px 10px; font-size: 14px; }
-  nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; background: var(--card);
-    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); z-index: 5; }
-  nav button { flex: 1; border: 0; background: none; padding: 12px 0; font-size: 15px; color: var(--muted); }
-  nav button.on { color: var(--accent); font-weight: 600; }
-  form.add { display: flex; gap: 8px; position: sticky; top: calc(54px + env(safe-area-inset-top));
-    background: var(--bg); padding: 4px 0 10px; z-index: 4; }
-  form.add input { flex: 1; font: inherit; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
-    background: var(--card); color: var(--text); min-width: 0; }
-  .group { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-  .group.unknown { background: var(--warn); border-color: var(--warn-line); }
-  .group.alldone { opacity: .55; }
-  .group h2 { margin: 0; padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 8px;
-    border-bottom: 1px solid var(--line); }
-  .num { background: var(--text); color: var(--bg); border-radius: 50%; width: 22px; height: 22px;
-    display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-  .hint { color: var(--muted); font-size: 12px; font-weight: 400; margin-left: auto; }
-  .item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-  .item:last-child { border-bottom: 0; }
-  .item input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--accent); flex: none; }
-  .item .t { flex: 1; word-break: break-word; }
-  .item.done .t { text-decoration: line-through; color: var(--muted); }
-  .item .cat, .item .del { border: 0; background: none; font-size: 20px; padding: 4px 6px; }
-  .item .del { color: var(--muted); }
-  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
-  .bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; align-items: center; }
-  .bar input[type=text] { flex: 1; min-width: 120px; font: inherit; padding: 8px; border-radius: 8px;
-    border: 1px solid var(--line); background: var(--card); color: var(--text); }
-  svg.map { width: 100%; height: auto; background: var(--card); border: 1px solid var(--line);
-    border-radius: 12px; display: block; user-select: none; -webkit-user-select: none; }
-  svg.map.edit { touch-action: none; }
-  .palette { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
-  .palette button { border: 2px solid transparent; border-radius: 10px; padding: 6px 8px; font-size: 13px; color: #111; }
-  .palette button.on { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg) inset; font-weight: 700; }
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; color: var(--muted); margin-top: 10px; }
-  dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--text);
-    padding: 14px; width: min(92vw, 420px); }
-  dialog::backdrop { background: rgba(0,0,0,.45); }
-  dialog h3 { margin: 0 0 10px; font-size: 16px; }
-  dialog .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  dialog .grid button { border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px; color: #111; font-size: 14px; }
-  p.note { color: var(--muted); font-size: 13px; margin: 6px 0; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.45 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    overscroll-behavior-y: none; -webkit-text-size-adjust: 100%; }
+  body { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+
+  /* Kopfzeile */
+  .top { display: flex; align-items: center; gap: 12px; max-width: 1100px; margin: 0 auto;
+    padding: calc(12px + env(safe-area-inset-top)) 16px 4px; }
+  @media (max-width: 420px) { .brand span:last-child { display: none; } }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.02em; font-size: 17px; flex: 1; min-width: 0; }
+  .logo { width: 36px; height: 36px; border-radius: 12px; background: var(--lime); display: grid; place-items: center; font-size: 19px; flex: none; }
+  .market-pill { position: relative; display: flex; align-items: center; gap: 6px; height: 42px; max-width: 62%;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 0 30px 0 12px; box-shadow: var(--shadow); }
+  .market-pill select { appearance: none; -webkit-appearance: none; border: 0; background: none; outline: none; min-width: 0;
+    font: inherit; font-weight: 700; font-size: 14px; color: var(--ink); text-overflow: ellipsis; }
+  .market-pill::after { content: ""; position: absolute; right: 14px; top: 50%; width: 6px; height: 6px; pointer-events: none;
+    border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: translateY(-70%) rotate(45deg); }
+
+  /* Tabs: unten schwebend auf dem Handy, oben im Kopf auf dem Desktop */
+  .tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 20;
+    display: flex; gap: 4px; padding: 5px; border-radius: 999px; background: var(--ink); box-shadow: 0 12px 32px rgba(0,0,0,.28); }
+  .tabs button { display: flex; align-items: center; gap: 8px; border: 0; background: none; color: var(--bg); opacity: .72;
+    padding: 11px 20px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+  .tabs button.on { background: var(--bg); color: var(--ink); opacity: 1; }
+  .tabs svg { width: 20px; height: 20px; }
+  .tabs .badge { background: var(--lime); color: #17221b; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 7px; }
+
+  main { padding: 8px 16px 16px; max-width: 1100px; margin: 0 auto; }
+  .listview { max-width: 680px; margin: 0 auto; }
+
+  /* Kopfbereich der Liste */
+  .hero { margin: 12px 0 16px; }
+  .hero h1 { font-size: 32px; line-height: 1.1; letter-spacing: -.035em; margin: 0 0 8px; font-weight: 800; }
+  .meta { color: var(--muted); font-size: 14px; display: flex; gap: 4px 14px; flex-wrap: wrap; }
+  .meta b { color: var(--ink); }
+  .progress { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 14px; }
+  .progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), #5fbf73); transition: width .4s; }
+
+  /* Markt-Empfehlung */
+  .reco { border-radius: var(--r); padding: 14px 16px; margin-bottom: 14px; background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow); }
+  .reco.ok { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .reco .r { display: flex; align-items: center; gap: 12px; }
+  .reco .ic { font-size: 24px; flex: none; }
+  .reco .tx { flex: 1; min-width: 0; font-size: 13px; opacity: .92; }
+  .reco .tx b { display: block; font-size: 16px; opacity: 1; }
+  .reco .go { border: 0; background: var(--lime); color: #17221b; font-weight: 800; border-radius: 999px; padding: 10px 16px; flex: none; }
+  .reco details { margin-top: 10px; font-size: 13px; }
+  .reco summary { cursor: pointer; opacity: .8; font-weight: 600; }
+  .cmp { margin-top: 8px; display: grid; gap: 6px; }
+  .cmp div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(127,127,127,.14); }
+
+  /* Eingabe */
+  form.add { position: sticky; top: calc(10px + env(safe-area-inset-top)); z-index: 10; display: flex; gap: 8px; padding: 6px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  form.add input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font: inherit; font-size: 16px; color: var(--ink); padding: 10px 6px 10px 16px; }
+  form.add input::placeholder { color: var(--muted); }
+  form.add button { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); flex: none; display: grid; place-items: center; }
+  form.add button svg { width: 22px; height: 22px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 10px; padding: 2px 16px 6px; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .chip span { margin-right: 5px; }
+
+  /* Gruppen & Artikel */
+  .group { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); margin-bottom: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .group.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .group.done { opacity: .55; }
+  .ghead { display: flex; align-items: center; gap: 12px; padding: 14px 14px 8px; }
+  .tile { position: relative; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 23px; flex: none; }
+  .tile .n, .sn { min-width: 22px; height: 22px; border-radius: 99px; background: var(--ink); color: var(--surface); font-size: 11px; font-weight: 800;
+    display: inline-grid; place-items: center; padding: 0 5px; }
+  .tile .n { position: absolute; top: -7px; left: -7px; border: 2px solid var(--surface); }
+  .gtitle { flex: 1; min-width: 0; }
+  .gtitle b { display: block; font-size: 16px; letter-spacing: -.01em; }
+  .gtitle small { color: var(--muted); font-size: 13px; }
+  .item { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 4px; }
+  .item + .item { border-top: 1px solid var(--line); }
+  .tog { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; border: 0; background: none; text-align: left; padding: 0; min-height: 54px; }
+  .check { width: 48px; height: 48px; display: grid; place-items: center; flex: none; }
+  .check i { width: 25px; height: 25px; border-radius: 50%; border: 2px solid var(--muted); display: grid; place-items: center; transition: .15s; }
+  .check i::after { content: ""; width: 6px; height: 11px; border-right: 2.5px solid var(--accent-ink); border-bottom: 2.5px solid var(--accent-ink);
+    transform: translate(0, -1px) rotate(45deg); opacity: 0; }
+  .item.done .check i { background: var(--accent); border-color: var(--accent); }
+  .item.done .check i::after { opacity: 1; }
+  .t { font-weight: 600; word-break: break-word; }
+  .t small { display: block; color: var(--muted); font-size: 12px; font-weight: 500; }
+  .item.done .t { text-decoration: line-through; color: var(--muted); font-weight: 500; }
+  .ibtn { width: 42px; height: 42px; border: 0; background: none; border-radius: 12px; color: var(--muted); display: grid; place-items: center; flex: none; }
+  .ibtn:hover { background: var(--surface-2); }
+  .ibtn svg { width: 20px; height: 20px; }
+  .pill { border: 0; background: var(--ink); color: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; flex: none; }
+  .empty { text-align: center; padding: 36px 20px; background: var(--surface); border: 1.5px dashed var(--line); border-radius: var(--r); color: var(--muted); margin-bottom: 12px; }
+  .empty .big { font-size: 52px; line-height: 1.2; }
+  .empty b { display: block; color: var(--ink); font-size: 18px; margin: 6px 0 4px; }
+  .center { display: flex; justify-content: center; margin-top: 6px; }
+
+  /* Buttons & Felder */
+  .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 0 16px; min-height: 44px; font-weight: 700; font-size: 14px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.danger { color: #d64545; }
+  .btn.wide { width: 100%; margin-top: 8px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .grow { flex: 1; }
+  .field { width: 100%; font: inherit; font-size: 16px; font-weight: 700; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); margin: 6px 0 2px; }
+  .note { color: var(--muted); font-size: 13px; margin: 8px 0; }
+  .eyebrow { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+
+  /* Karte */
+  .mapwrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+  .side, .mapbox { min-width: 0; }
+  .mapwrap:not(.editing) .side { order: 2; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); }
+  .panel h2 { margin: 2px 0 6px; font-size: 24px; letter-spacing: -.03em; line-height: 1.15; }
+  .mapbox { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 10px; box-shadow: var(--shadow); }
+  svg.map { width: 100%; height: auto; display: block; user-select: none; -webkit-user-select: none; }
+  svg.map.edit { touch-action: none; cursor: crosshair; }
+  .palette { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 10px -16px 0; padding: 2px 16px 4px; }
+  .palette::-webkit-scrollbar { display: none; }
+  .palette button { flex: none; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--surface-2);
+    border-radius: 14px; padding: 6px 12px 6px 6px; font-size: 13px; font-weight: 700; text-align: left; min-height: 44px; white-space: nowrap; }
+  .palette button.on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink) inset; }
+  .sw { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; font-size: 16px; flex: none; }
+  .steps { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 2px; }
+  .steps li { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; padding: 6px 0; }
+  .steps li small { margin-left: auto; color: var(--muted); font-weight: 700; }
+  .sn.plain { background: none; font-size: 16px; padding: 0; }
+  .sz { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .num { width: 80px; font: inherit; font-size: 16px; font-weight: 700; padding: 8px 10px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
+  .seg { display: flex; gap: 4px; padding: 4px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; }
+  .seg button { flex: 1; border: 0; background: none; border-radius: 10px; padding: 8px 4px; font-weight: 700; font-size: 13px; color: var(--muted); }
+  .seg button.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
+  /* Bottom Sheet */
+  dialog { border: 0; padding: 0; background: var(--surface); color: var(--ink); border-radius: 26px; width: min(100%, 460px); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+  dialog::backdrop { background: rgba(10,15,12,.45); }
+  .sheet { padding: 18px 16px 16px; }
+  .sheet .grab { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: -6px auto 14px; }
+  .sheet h3 { margin: 0 0 2px; font-size: 20px; letter-spacing: -.02em; }
+  .sheet p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+  .sheet .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sheet .grid button { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--surface-2);
+    border-radius: 16px; padding: 8px; font-weight: 700; font-size: 13px; text-align: left; min-height: 52px; }
+  .sheet .grid button.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+
+  /* Toast */
+  #toast { position: fixed; left: 50%; bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 30; transform: translate(-50%, 16px); opacity: 0; pointer-events: none;
+    transition: .25s; background: var(--ink); color: var(--bg); padding: 8px 8px 8px 16px; border-radius: 999px; display: flex; gap: 12px; align-items: center;
+    font-size: 14px; max-width: calc(100% - 32px); box-shadow: 0 12px 32px rgba(0,0,0,.28); white-space: nowrap; }
+  #toast span { overflow: hidden; text-overflow: ellipsis; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  #toast button { border: 0; background: var(--lime); color: #17221b; border-radius: 999px; padding: 7px 12px; font-weight: 800; font-size: 13px; flex: none; }
+
+  @media (max-width: 599px) {
+    dialog { margin: auto 0 0; max-width: 100%; width: 100%; border-radius: 26px 26px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+  }
+  @media (min-width: 900px) {
+    body { padding-bottom: 32px; }
+    .top { padding-top: 20px; }
+    .tabs { position: static; transform: none; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); order: 0; }
+    .tabs button { color: var(--ink); padding: 8px 16px; }
+    .tabs button.on { background: var(--ink); color: var(--surface); }
+    .brand { flex: none; margin-right: auto; }
+    #toast { bottom: 28px; }
+    .mapwrap { grid-template-columns: 340px minmax(0, 1fr); align-items: start; }
+    .mapwrap:not(.editing) .side { order: 0; }
+    .side { position: sticky; top: 20px; }
+    .palette { display: grid; grid-template-columns: 1fr 1fr; overflow: visible; margin: 10px 0 0; padding: 0; }
+    .palette button { white-space: normal; }
+    svg.map { max-height: calc(100vh - 130px); }
+    .hero h1 { font-size: 40px; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>🛒 Einkaufsplaner</h1>
-  <select id="marketSel" aria-label="Supermarkt"></select>
+<header class="top">
+  <div class="brand"><span class="logo">🛒</span><span>Einkaufsplaner</span></div>
+  <nav class="tabs">
+    <button data-tab="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>Liste<span class="badge" id="listBadge" hidden></span></button>
+    <button data-tab="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Markt</button>
+  </nav>
+  <label class="market-pill"><span>📍</span><select id="marketSel" aria-label="Supermarkt"></select></label>
 </header>
 <main id="view"></main>
-<nav>
-  <button data-tab="list">📝 Liste</button>
-  <button data-tab="map">🗺️ Markt</button>
-</nav>
-<dialog id="catDlg"></dialog>
+<div id="toast" role="status"></div>
+<dialog id="sheet"></dialog>
 
 <script>
 'use strict';
 
-const COLS = 8, ROWS = 9, S = 40;
+const S = 40;            // Kantenlänge einer Kachel in SVG-Einheiten
+const M_PER_CELL = 0.5;  // eine Kachel ≈ 0,5 m im echten Markt
+const DEFAULT_SIZE = { w: 20, d: 15 }; // Standardgröße eines neuen Markts in Metern
+const fmt = n => String(n).replace('.', ',');
 
 // Spezielle Felder (Eingang, Kasse) + Warengruppen mit Stichwörtern für die automatische Zuordnung
 const CATS = [
   { k: 'entry',    n: 'Eingang',          e: '🚪', c: '#cfd8dc', special: true },
   { k: 'kasse',    n: 'Kasse',            e: '💳', c: '#b0bec5', special: true },
-  { k: 'obst',     n: 'Obst & Gemüse',    e: '🥬', c: '#a5d66f', kw: 'apfel,äpfel,banane,birne,orange,zitrone,limette,traube,erdbeere,himbeere,blaubeere,beere,kiwi,mango,ananas,melone,pfirsich,nektarine,avocado,tomate,gurke,paprika,zwiebel,knoblauch,kartoffel,karotte,möhre,salat,spinat,brokkoli,blumenkohl,zucchini,aubergine,pilz,champignon,lauch,porree,sellerie,kohl,radieschen,ingwer,kräuter,petersilie,basilikum,schnittlauch,obst,gemüse,süßkartoffel,kürbis,fenchel,mais,rucola,rote bete,frühlingszwiebel' },
-  { k: 'brot',     n: 'Brot & Backwaren', e: '🥖', c: '#e6c27a', kw: 'brot,brötchen,semmel,toast,croissant,baguette,kuchen,brezel,laugenbrezel,laugen,bäcker,vollkornbrot,aufbackbrötchen' },
-  { k: 'kuehl',    n: 'Milch & Käse',     e: '🧀', c: '#ffe082', kw: 'milch,joghurt,quark,käse,butter,sahne,ei,eier,margarine,frischkäse,mozzarella,parmesan,gouda,skyr,schmand,creme fraiche,crème fraîche,pudding,kefir,hafermilch,sojamilch,tofu,feta,halloumi,buttermilch,hüttenkäse,joghurt' },
-  { k: 'fleisch',  n: 'Fleisch & Wurst',  e: '🥩', c: '#f19a9a', kw: 'fleisch,hack,hackfleisch,hähnchen,huhn,pute,schnitzel,steak,wurst,schinken,salami,speck,bratwurst,würstchen,lachs,fisch,garnelen,aufschnitt,leberkäse,gyros,rind,schwein,leberwurst,mett,forelle' },
-  { k: 'tk',       n: 'Tiefkühl',         e: '🧊', c: '#9ad7f0', kw: 'tiefkühl,tk,pizza,eis,eiscreme,pommes,fischstäbchen,tiefkühlpizza,rahmspinat,gefrorene,blattspinat,nuggets' },
-  { k: 'getraenke',n: 'Getränke',         e: '🥤', c: '#80cbc4', kw: 'wasser,saft,cola,limo,limonade,bier,wein,sekt,tee,kaffee,apfelschorle,schorle,mineralwasser,sprudel,energy,spezi,fanta,sprite,whisky,gin,vodka,prosecco,rotwein,weißwein,orangensaft,eistee,kakao' },
-  { k: 'trocken',  n: 'Nudeln & Konserven',e:'🍝', c: '#ffb878', kw: 'nudeln,pasta,spaghetti,reis,mehl,zucker,salz,öl,olivenöl,essig,konserve,dose,dosen,dosentomaten,passierte tomaten,tomatenmark,müsli,haferflocken,cornflakes,linsen,bohnen,kichererbsen,thunfisch,suppe,soße,sauce,ketchup,senf,mayo,mayonnaise,gewürz,marmelade,honig,nutella,couscous,brühe,backpulver,hefe,pesto,sonnenblumenöl,bulgur,maisdose,erdnussbutter,rapsöl' },
-  { k: 'suess',    n: 'Süßes & Snacks',   e: '🍫', c: '#d1a3e8', kw: 'schokolade,chips,kartoffelchips,kekse,gummibärchen,bonbon,riegel,süßigkeiten,snack,erdnüsse,nüsse,popcorn,salzstangen,lakritz,waffeln,kaugummi,pralinen,cracker,müsliriegel,haribo' },
-  { k: 'drogerie', n: 'Drogerie',         e: '🧴', c: '#f4a6c8', kw: 'zahnpasta,zahnbürste,shampoo,duschgel,seife,deo,tampons,binden,wattepads,creme,rasierer,taschentücher,windeln,haarspray,mundwasser,sonnencreme,handcreme,zahnseide,spülung,pflaster' },
-  { k: 'haushalt', n: 'Haushalt',         e: '🧽', c: '#b7c0f0', kw: 'spülmittel,waschmittel,klopapier,toilettenpapier,küchenrolle,müllbeutel,müllsack,schwamm,putzmittel,reiniger,alufolie,backpapier,gefrierbeutel,batterien,glühbirne,kerzen,servietten,spülmaschinentabs,tabs,weichspüler,frischhaltefolie,tüten' },
+  { k: 'obst',     n: 'Obst & Gemüse',    e: '🥬', c: '#b5e08a', kw: 'apfel,äpfel,banane,birne,orange,zitrone,limette,traube,erdbeere,himbeere,blaubeere,beere,kiwi,mango,ananas,melone,pfirsich,nektarine,avocado,tomate,gurke,paprika,zwiebel,knoblauch,kartoffel,karotte,möhre,salat,spinat,brokkoli,blumenkohl,zucchini,aubergine,pilz,champignon,lauch,porree,sellerie,kohl,radieschen,ingwer,kräuter,petersilie,basilikum,schnittlauch,obst,gemüse,süßkartoffel,kürbis,fenchel,mais,rucola,rote bete,frühlingszwiebel' },
+  { k: 'brot',     n: 'Brot & Backwaren', e: '🥖', c: '#efd29a', kw: 'brot,brötchen,semmel,toast,croissant,baguette,kuchen,brezel,laugenbrezel,laugen,bäcker,vollkornbrot,aufbackbrötchen' },
+  { k: 'kuehl',    n: 'Milch & Käse',     e: '🧀', c: '#ffe58f', kw: 'milch,joghurt,quark,käse,butter,sahne,ei,eier,margarine,frischkäse,mozzarella,parmesan,gouda,skyr,schmand,creme fraiche,crème fraîche,pudding,kefir,hafermilch,sojamilch,tofu,feta,halloumi,buttermilch,hüttenkäse' },
+  { k: 'fleisch',  n: 'Fleisch & Wurst',  e: '🥩', c: '#f6aaa6', kw: 'fleisch,hack,hackfleisch,hähnchen,huhn,pute,schnitzel,steak,wurst,schinken,salami,speck,bratwurst,würstchen,lachs,fisch,garnelen,aufschnitt,leberkäse,gyros,rind,schwein,leberwurst,mett,forelle' },
+  { k: 'tk',       n: 'Tiefkühl',         e: '🧊', c: '#a8dcf2', kw: 'tiefkühl,tk,pizza,eis,eiscreme,pommes,fischstäbchen,tiefkühlpizza,rahmspinat,gefrorene,blattspinat,nuggets' },
+  { k: 'getraenke',n: 'Getränke',         e: '🥤', c: '#94d6cd', kw: 'wasser,saft,cola,limo,limonade,bier,wein,sekt,tee,kaffee,apfelschorle,schorle,mineralwasser,sprudel,energy,spezi,fanta,sprite,whisky,gin,vodka,prosecco,rotwein,weißwein,orangensaft,eistee,kakao' },
+  { k: 'trocken',  n: 'Nudeln & Konserven',e:'🍝', c: '#ffc596', kw: 'nudeln,pasta,spaghetti,reis,mehl,zucker,salz,öl,olivenöl,essig,konserve,dose,dosen,dosentomaten,passierte tomaten,tomatenmark,müsli,haferflocken,cornflakes,linsen,bohnen,kichererbsen,thunfisch,suppe,soße,sauce,ketchup,senf,mayo,mayonnaise,gewürz,marmelade,honig,nutella,couscous,brühe,backpulver,hefe,pesto,sonnenblumenöl,bulgur,maisdose,erdnussbutter,rapsöl' },
+  { k: 'suess',    n: 'Süßes & Snacks',   e: '🍫', c: '#dcb6ef', kw: 'schokolade,chips,kartoffelchips,kekse,gummibärchen,bonbon,riegel,süßigkeiten,snack,erdnüsse,nüsse,popcorn,salzstangen,lakritz,waffeln,kaugummi,pralinen,cracker,müsliriegel,haribo' },
+  { k: 'drogerie', n: 'Drogerie',         e: '🧴', c: '#f7b8d3', kw: 'zahnpasta,zahnbürste,shampoo,duschgel,seife,deo,tampons,binden,wattepads,creme,rasierer,taschentücher,windeln,haarspray,mundwasser,sonnencreme,handcreme,zahnseide,spülung,pflaster' },
+  { k: 'haushalt', n: 'Haushalt',         e: '🧽', c: '#c3caf4', kw: 'spülmittel,waschmittel,klopapier,toilettenpapier,küchenrolle,müllbeutel,müllsack,schwamm,putzmittel,reiniger,alufolie,backpapier,gefrierbeutel,batterien,glühbirne,kerzen,servietten,spülmaschinentabs,tabs,weichspüler,frischhaltefolie,tüten' },
 ];
 const CAT = Object.fromEntries(CATS.map(c => [c.k, c]));
 const GOODS = CATS.filter(c => !c.special);
@@ -120,7 +257,23 @@ const TEMPLATE = [
   '........',
   'KK....EE',
 ];
-const templateGrid = () => TEMPLATE.join('').split('').map(ch => LETTER[ch] || '');
+// Vorlage auf beliebige Rastergröße hochskalieren
+function templateGrid(cols, rows) {
+  const g = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++)
+    g.push(LETTER[TEMPLATE[Math.floor(y * TEMPLATE.length / rows)][Math.floor(x * TEMPLATE[0].length / cols)]] || '');
+  return g;
+}
+// Bestehenden Grundriss auf neue Rastergröße umrechnen (nächster Nachbar)
+function resample(m, cols, rows) {
+  const g = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++)
+    g.push(m.grid[Math.floor(y * m.rows / rows) * m.cols + Math.floor(x * m.cols / cols)] || '');
+  Object.assign(m, { cols, rows, grid: g });
+}
+
+const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const ICON_MORE = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
 
 // ---------- Zustand ----------
 const KEY = 'einkaufsplaner.v1';
@@ -129,13 +282,22 @@ let state = load();
 let tab = 'list';
 let editMap = false;
 let brush = 'obst';
+let brushSize = 2;
 let painting = false;
+let lastCell = null;
 
-function newMarket(name) { return { id: uid(), name, grid: templateGrid() }; }
+function newMarket(name) {
+  const cols = DEFAULT_SIZE.w / M_PER_CELL, rows = DEFAULT_SIZE.d / M_PER_CELL;
+  return { id: uid(), name, cols, rows, grid: templateGrid(cols, rows), missing: {} };
+}
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && s.markets && s.markets.length) return s;
+    if (s && s.markets && s.markets.length) {
+      // Alte Märkte (festes 8×9-Raster) auf das 0,5-m-Raster umrechnen
+      s.markets.forEach(m => { if (!m.cols) { m.cols = 8; m.rows = 9; resample(m, DEFAULT_SIZE.w / M_PER_CELL, DEFAULT_SIZE.d / M_PER_CELL); } });
+      return s;
+    }
   } catch (e) {}
   const m = newMarket('Mein Supermarkt');
   return { markets: [m], active: m.id, items: [], learned: {}, history: [] };
@@ -162,15 +324,15 @@ function guess(text) {
   }
   return best; // '' = unbekannt
 }
+const isMissing = (m, it) => !!(m.missing && m.missing[norm(it.text)]);
 
 // ---------- Karte / Route ----------
-const idx = (x, y) => y * COLS + x;
 function centroids(m) {
   const acc = {};
   m.grid.forEach((k, i) => {
     if (!k) return;
     const a = acc[k] || (acc[k] = { x: 0, y: 0, n: 0 });
-    a.x += i % COLS; a.y += Math.floor(i / COLS); a.n++;
+    a.x += i % m.cols; a.y += Math.floor(i / m.cols); a.n++;
   });
   for (const k in acc) { acc[k].x /= acc[k].n; acc[k].y /= acc[k].n; }
   return acc;
@@ -178,7 +340,7 @@ function centroids(m) {
 // Stabile Laufreihenfolge: vom Eingang immer zur nächstgelegenen Warengruppe, Kasse zuletzt
 function computeRoute(m) {
   const c = centroids(m);
-  let pos = c.entry || { x: COLS - 1, y: ROWS - 1 };
+  let pos = c.entry || { x: m.cols - 1, y: m.rows - 1 };
   const left = Object.keys(c).filter(k => !CAT[k].special);
   const order = [];
   while (left.length) {
@@ -192,26 +354,44 @@ function computeRoute(m) {
   }
   return order;
 }
+function routeDistance(m, keys) {
+  const c = centroids(m);
+  const pts = [c.entry || { x: m.cols - 1, y: m.rows - 1 }, ...keys.map(k => c[k])];
+  if (c.kasse && keys.length) pts.push(c.kasse);
+  let d = 0;
+  for (let i = 1; i < pts.length; i++) d += Math.abs(pts[i].x - pts[i - 1].x) + Math.abs(pts[i].y - pts[i - 1].y);
+  return Math.round(d * M_PER_CELL);
+}
+// Wie gut passt ein Markt zur aktuellen Liste? Erst Verfügbarkeit, dann Laufweg
+function evaluate(m) {
+  const open = state.items.filter(i => !i.done && i.cat);
+  const route = computeRoute(m);
+  const avail = open.filter(i => route.includes(i.cat) && !isMissing(m, i));
+  const keys = route.filter(k => avail.some(i => i.cat === k));
+  return { m, total: open.length, avail: avail.length, stops: keys.length, dist: routeDistance(m, keys) };
+}
+const ranking = () => state.markets.map(evaluate).sort((a, b) => b.avail - a.avail || a.dist - b.dist);
+
 // Zusammenhängende Flächen je Warengruppe (für Beschriftung)
 function components(m) {
-  const seen = new Array(m.grid.length).fill(false), out = [];
+  const C = m.cols, seen = new Array(m.grid.length).fill(false), out = [];
   m.grid.forEach((k, i) => {
     if (!k || seen[i]) return;
     const cells = [], stack = [i]; seen[i] = true;
     while (stack.length) {
       const j = stack.pop(); cells.push(j);
-      const x = j % COLS, y = Math.floor(j / COLS);
+      const x = j % C, y = Math.floor(j / C);
       for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
         const nx = x + dx, ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
-        const nj = idx(nx, ny);
+        if (nx < 0 || ny < 0 || nx >= C || ny >= m.rows) continue;
+        const nj = ny * C + nx;
         if (!seen[nj] && m.grid[nj] === k) { seen[nj] = true; stack.push(nj); }
       }
     }
-    const cx = cells.reduce((a, j) => a + j % COLS, 0) / cells.length;
-    const cy = cells.reduce((a, j) => a + Math.floor(j / COLS), 0) / cells.length;
+    const cx = cells.reduce((a, j) => a + j % C, 0) / cells.length;
+    const cy = cells.reduce((a, j) => a + Math.floor(j / C), 0) / cells.length;
     const label = cells.reduce((b, j) => {
-      const d = Math.hypot(j % COLS - cx, Math.floor(j / COLS) - cy);
+      const d = Math.hypot(j % C - cx, Math.floor(j / C) - cy);
       return d < b.d ? { j, d } : b;
     }, { j: cells[0], d: Infinity }).j;
     out.push({ k, cells, label });
@@ -221,23 +401,23 @@ function components(m) {
 
 // Einkaufsplan: Gruppen in Laufreihenfolge
 function plan() {
-  const m = market(), route = computeRoute(m), mapped = new Set(route);
-  const groups = [];
-  const items = state.items;
+  const m = market(), route = computeRoute(m), items = state.items, groups = [];
   const unknown = items.filter(i => !i.cat);
-  if (unknown.length) groups.push({ key: '?', unknown: true, items: unknown });
+  if (unknown.length) groups.push({ key: '?', kind: 'unknown', items: unknown });
+  const here = items.filter(i => i.cat && !isMissing(m, i));
   for (const k of route) {
-    const its = items.filter(i => i.cat === k);
+    const its = here.filter(i => i.cat === k);
     if (its.length) groups.push({ key: k, items: its });
   }
-  const unplaced = items.filter(i => i.cat && !mapped.has(i.cat));
   const byCat = {};
-  unplaced.forEach(i => (byCat[i.cat] = byCat[i.cat] || []).push(i));
-  for (const k in byCat) groups.push({ key: k, unplaced: true, items: byCat[k] });
+  here.filter(i => !route.includes(i.cat)).forEach(i => (byCat[i.cat] = byCat[i.cat] || []).push(i));
+  for (const k in byCat) groups.push({ key: k, kind: 'unplaced', items: byCat[k] });
+  const missing = items.filter(i => i.cat && isMissing(m, i));
+  if (missing.length) groups.push({ key: 'missing', kind: 'missing', items: missing });
   let n = 0;
   groups.forEach(g => {
     g.open = g.items.filter(i => !i.done).length;
-    if (!g.unknown && !g.unplaced && g.open) g.num = ++n;
+    if (!g.kind && g.open) g.num = ++n;
   });
   return groups;
 }
@@ -247,169 +427,320 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
 function render() {
-  const sel = $('#marketSel');
-  sel.innerHTML = state.markets.map(m => `<option value="${m.id}" ${m.id === market().id ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const sel = $('#marketSel'), m = market();
+  sel.innerHTML = state.markets.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')
+    + '<option disabled>──────────</option><option value="__edit">✏️ Grundriss bearbeiten</option><option value="__new">＋ Neuen Markt anlegen</option>';
+  sel.value = m.id;
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const open = state.items.filter(i => !i.done).length, badge = $('#listBadge');
+  badge.textContent = open; badge.hidden = !open;
   $('#view').innerHTML = tab === 'list' ? listHtml() : mapHtml();
   if (tab === 'map') renderMap();
 }
 
 function listHtml() {
-  const groups = plan();
-  const hist = [...new Set(state.history)].slice(-200).map(h => `<option value="${esc(h)}">`).join('');
-  let h = `<form class="add" id="addForm">
-    <input id="addInput" list="hist" placeholder="Artikel hinzufügen …" autocomplete="off" autocapitalize="sentences" enterkeyhint="done">
-    <datalist id="hist">${hist}</datalist>
-    <button class="btn primary" type="submit">＋</button></form>`;
-  if (!state.items.length) {
-    return h + `<div class="empty">Noch nichts auf der Liste.<br>Tippe oben einfach einen Artikel ein – die Warengruppe wird automatisch erkannt und nach Laufweg im Markt sortiert.</div>`;
-  }
-  for (const g of groups) {
+  const m = market(), ev = evaluate(m);
+  const total = state.items.length, done = state.items.filter(i => i.done).length, open = total - done;
+  let h = '<div class="listview"><section class="hero">';
+  h += `<h1>${!total ? 'Was brauchst du?' : open ? 'Deine Liste' : 'Alles erledigt'}</h1>`;
+  h += total
+    ? `<div class="meta"><span><b>${open}</b> offen</span><span><b>${ev.stops}</b> Stationen</span><span>≈ <b>${ev.dist} m</b> Laufweg</span></div>
+       <div class="progress"><i style="width:${done / total * 100}%"></i></div>`
+    : `<div class="meta">Einfach eintippen – sortiert wird nach deinem Weg durch den Markt.</div>`;
+  h += '</section>' + recoHtml();
+  h += `<form class="add" id="addForm" autocomplete="off">
+    <input id="addInput" placeholder="Artikel hinzufügen …" autocapitalize="sentences" enterkeyhint="done" aria-label="Artikel">
+    <button type="submit" aria-label="Hinzufügen">${ICON_PLUS}</button></form>`;
+  h += suggestHtml();
+  if (!total) h += `<div class="empty"><div class="big">🧺</div><b>Deine Liste ist leer</b>Tippe z. B. „Milch“, „Bananen“ oder „Spülmittel“.</div>`;
+  else if (!open) h += `<div class="empty"><div class="big">🎉</div><b>Fertig eingekauft!</b>Ab zur Kasse.</div>`;
+  for (const g of plan()) h += groupHtml(g, m);
+  if (done) h += `<div class="center"><button class="btn" data-act="clearDone">Erledigte entfernen (${done})</button></div>`;
+  return h + '</div>';
+}
+
+function recoHtml() {
+  if (state.markets.length < 2) return '';
+  const r = ranking(), best = r[0];
+  if (!best.total) return '';
+  const cur = r.find(x => x.m.id === market().id);
+  const better = best.m.id !== cur.m.id && (best.avail > cur.avail || (best.avail === cur.avail && best.dist < cur.dist));
+  const line = x => `${x.avail}/${x.total} Artikel · ≈ ${x.dist} m`;
+  const cmp = `<details><summary>Alle Märkte vergleichen</summary><div class="cmp">${
+    r.map((x, n) => `<div><span>${n === 0 ? '🏆 ' : ''}${esc(x.m.name)}</span><span>${line(x)}</span></div>`).join('')}</div></details>`;
+  if (!better) return `<section class="reco ok"><div class="r"><span class="ic">✅</span><div class="tx"><b>${esc(cur.m.name)} passt am besten</b>${line(cur)}</div></div>${cmp}</section>`;
+  return `<section class="reco"><div class="r"><span class="ic">💡</span>
+    <div class="tx"><b>${esc(best.m.name)} ist besser</b>${line(best)} statt ${line(cur)}</div>
+    <button class="go" data-act="switch" data-id="${best.m.id}">Wechseln</button></div>${cmp}</section>`;
+}
+
+function suggestHtml() {
+  const onList = new Set(state.items.filter(i => !i.done).map(i => norm(i.text)));
+  const freq = new Map();
+  state.history.forEach((t, n) => {
+    const k = norm(t);
+    if (!k || onList.has(k)) return;
+    const f = freq.get(k) || { c: 0 };
+    freq.set(k, { t, c: f.c + 1, last: n });
+  });
+  let list = [...freq.values()].sort((a, b) => b.c - a.c || b.last - a.last).slice(0, 12).map(f => f.t);
+  if (!list.length && !state.items.length) list = ['Milch', 'Brot', 'Bananen', 'Eier', 'Käse', 'Tomaten', 'Nudeln', 'Kaffee'];
+  if (!list.length) return '';
+  return `<div class="chips">${list.map(t => {
+    const c = CAT[guess(t)];
+    return `<button class="chip" data-act="add" data-text="${esc(t)}">${c ? `<span>${c.e}</span>` : ''}${esc(t)}</button>`;
+  }).join('')}</div>`;
+}
+
+function groupHtml(g, m) {
+  let tile, title, sub;
+  if (g.kind === 'unknown') {
+    tile = '<div class="tile" style="background:var(--warn-line)">❓</div>';
+    title = 'Noch nicht zugeordnet'; sub = 'Einmal zuordnen – die App merkt es sich';
+  } else if (g.kind === 'missing') {
+    tile = '<div class="tile" style="background:var(--line)">🚫</div>';
+    title = `Nicht bei ${esc(m.name)}`; sub = 'Als nicht erhältlich markiert';
+  } else {
     const c = CAT[g.key];
-    const title = g.unknown ? '❓ Nicht zugeordnet' : `${c.e} ${esc(c.n)}`;
-    const hint = g.unknown ? 'Tippe auf ❓, um zuzuordnen' : g.unplaced ? 'im Markt nicht eingezeichnet' : '';
-    const sorted = [...g.items].sort((a, b) => a.done - b.done);
-    h += `<section class="group ${g.unknown ? 'unknown' : ''} ${!g.open ? 'alldone' : ''}">
-      <h2>${g.num ? `<span class="num">${g.num}</span>` : ''}${title}<span class="hint">${hint}</span></h2>
-      ${sorted.map(i => `<div class="item ${i.done ? 'done' : ''}">
-        <input type="checkbox" data-act="toggle" data-id="${i.id}" ${i.done ? 'checked' : ''} aria-label="erledigt">
-        <span class="t">${esc(i.text)}</span>
-        <button class="cat" data-act="cat" data-id="${i.id}" aria-label="Warengruppe ändern">${i.cat ? CAT[i.cat].e : '❓'}</button>
-        <button class="del" data-act="del" data-id="${i.id}" aria-label="löschen">✕</button>
-      </div>`).join('')}
-    </section>`;
+    tile = `<div class="tile" style="background:${c.c}">${c.e}${g.num ? `<span class="n">${g.num}</span>` : ''}</div>`;
+    title = esc(c.n);
+    sub = g.kind === 'unplaced' ? 'Nicht im Grundriss eingezeichnet' : g.open ? `${g.open} offen` : 'erledigt';
   }
-  if (state.items.some(i => i.done)) h += `<div class="bar"><button class="btn small" data-act="clearDone">✔ Erledigte entfernen</button></div>`;
-  return h;
+  const cls = g.kind === 'unknown' ? 'warn' : !g.open ? 'done' : '';
+  const items = [...g.items].sort((a, b) => a.done - b.done).map(i => itemHtml(i, g, m)).join('');
+  return `<section class="group ${cls}"><div class="ghead">${tile}<div class="gtitle"><b>${title}</b><small>${sub}</small></div></div>${items}</section>`;
+}
+
+function itemHtml(i, g, m) {
+  let extra = '';
+  if (g.kind === 'missing') {
+    const alt = state.markets.filter(x => x.id !== m.id && computeRoute(x).includes(i.cat) && !isMissing(x, i)).map(x => x.name);
+    if (alt.length) extra = `<small>Gibt’s bei ${esc(alt.join(', '))}</small>`;
+  }
+  const action = g.kind === 'unknown'
+    ? `<button class="pill" data-act="cat" data-id="${i.id}">Zuordnen</button>`
+    : `<button class="ibtn" data-act="cat" data-id="${i.id}" aria-label="Optionen">${ICON_MORE}</button>`;
+  return `<div class="item ${i.done ? 'done' : ''}">
+    <button class="tog" data-act="toggle" data-id="${i.id}"><span class="check"><i></i></span><span class="t">${esc(i.text)}${extra}</span></button>
+    ${action}</div>`;
 }
 
 function mapHtml() {
   const m = market();
-  let h = `<div class="bar">
-    <button class="btn small ${editMap ? 'primary' : ''}" data-act="toggleEdit">${editMap ? '✔ Fertig' : '✏️ Markt bearbeiten'}</button></div>`;
+  let side;
   if (editMap) {
-    h += `<div class="bar"><input type="text" id="mName" value="${esc(m.name)}" aria-label="Name des Marktes">
-      <button class="btn small" data-act="newMarket">＋ Neuer Markt</button>
-      <button class="btn small" data-act="resetGrid">↺ Vorlage</button>
-      ${state.markets.length > 1 ? '<button class="btn small danger" data-act="delMarket">🗑</button>' : ''}</div>
-      <p class="note">Wähle eine Abteilung und streiche über die Felder, um den Grundriss von oben zu malen. Leere Felder sind Gänge. Die Laufreihenfolge wird aus der Lage zum Eingang berechnet.</p>
-      <div class="palette">${CATS.map(c => `<button data-act="brush" data-k="${c.k}" class="${brush === c.k ? 'on' : ''}" style="background:${c.c}">${c.e} ${esc(c.n)}</button>`).join('')}
-      <button data-act="brush" data-k="" class="${brush === '' ? 'on' : ''}" style="background:#eee">🧹 Gang</button></div>`;
+    const pal = [...CATS, { k: '', e: '🧹', n: 'Gang', c: 'var(--line)' }];
+    side = `<div class="panel"><div class="eyebrow">Grundriss bearbeiten</div>
+      <input class="field" id="mName" value="${esc(m.name)}" aria-label="Name des Marktes">
+      <div class="row" style="margin-top:8px">
+        <label class="sz">Breite <input type="number" class="num" id="mW" min="4" max="100" step="0.5" value="${m.cols * M_PER_CELL}"> m</label>
+        <label class="sz">Tiefe <input type="number" class="num" id="mD" min="4" max="100" step="0.5" value="${m.rows * M_PER_CELL}"> m</label></div>
+      <p class="note">1 Kachel = 0,5 m · ${m.cols} × ${m.rows} Kacheln. Abteilung wählen, dann mit Finger oder Maus die Regale malen. Leere Kacheln sind Gänge – Rechtsklick löscht.</p>
+      <div class="seg" role="group" aria-label="Pinselgröße">${[[1, '0,5 m'], [2, '1 m'], [4, '2 m']].map(([n, l]) =>
+        `<button data-act="bsize" data-n="${n}" class="${brushSize === n ? 'on' : ''}">Pinsel ${l}</button>`).join('')}</div>
+      <div class="palette">${pal.map(c => `<button data-act="brush" data-k="${c.k}" class="${brush === c.k ? 'on' : ''}"><span class="sw" style="background:${c.c}">${c.e}</span>${esc(c.n)}</button>`).join('')}</div>
+      <div class="row" style="margin-top:14px"><button class="btn primary grow" data-act="toggleEdit">Fertig</button>
+        <button class="btn" data-act="resetGrid">Vorlage</button>
+        ${state.markets.length > 1 ? '<button class="btn danger" data-act="delMarket">Löschen</button>' : ''}</div>
+      <button class="btn wide" data-act="newMarket">＋ Weiteren Markt anlegen</button></div>`;
+  } else {
+    const groups = plan().filter(g => g.num), ev = evaluate(m);
+    side = `<div class="panel"><div class="eyebrow">Dein Weg durch</div><h2>${esc(m.name)}</h2>
+      ${groups.length
+        ? `<div class="meta"><span><b>${groups.length}</b> Stationen</span><span>≈ <b>${ev.dist} m</b></span><span>${fmt(m.cols * M_PER_CELL)} × ${fmt(m.rows * M_PER_CELL)} m</span></div>
+           <ol class="steps"><li><span class="sn plain">🚪</span>Eingang</li>
+           ${groups.map(g => `<li><span class="sn">${g.num}</span><span>${CAT[g.key].e}</span>${esc(CAT[g.key].n)}<small>${g.open}×</small></li>`).join('')}
+           <li><span class="sn plain">💳</span>Kasse</li></ol>`
+        : '<p class="note">Sobald etwas auf der Liste steht, siehst du hier deinen Laufweg.</p>'}
+      <div class="row" style="margin-top:14px"><button class="btn grow" data-act="toggleEdit">✏️ Grundriss bearbeiten</button>
+        <button class="btn" data-act="newMarket">＋ Markt</button></div>
+      ${state.markets.length < 2 ? '<p class="note">Tipp: Lege mehrere Märkte an – die App empfiehlt dir dann den besten für deine Liste.</p>' : ''}</div>`;
   }
-  h += `<svg class="map ${editMap ? 'edit' : ''}" id="svg" viewBox="0 0 ${COLS * S} ${ROWS * S}"></svg>`;
-  if (!editMap) h += `<div class="legend"><span>Farbig = hier brauchst du etwas</span><span>Zahl = Reihenfolge</span><span>Gestrichelt = Laufweg</span></div>`;
-  return h;
+  return `<div class="mapwrap ${editMap ? 'editing' : ''}"><div class="side">${side}</div>
+    <div class="mapbox"><svg class="map ${editMap ? 'edit' : ''}" id="svg" viewBox="0 0 ${m.cols * S} ${m.rows * S}"></svg></div></div>`;
 }
 
 function renderMap() {
   const svg = $('#svg'); if (!svg) return;
-  const m = market(), groups = plan();
-  const need = new Map(groups.filter(g => !g.unknown && !g.unplaced && g.open).map(g => [g.key, g]));
-  let out = '';
-  m.grid.forEach((k, i) => {
-    const x = (i % COLS) * S, y = Math.floor(i / COLS) * S;
-    if (!k) { out += `<rect x="${x}" y="${y}" width="${S}" height="${S}" fill="none" stroke="var(--line)" stroke-width=".5"/>`; return; }
-    const active = editMap || CAT[k].special || need.has(k);
-    out += `<rect x="${x}" y="${y}" width="${S}" height="${S}" fill="${CAT[k].c}" opacity="${active ? 1 : .22}" stroke="var(--card)" stroke-width="1"/>`;
+  const m = market(), g = m.grid, C = m.cols, R = m.rows;
+  const need = new Map(plan().filter(x => x.num).map(x => [x.key, x]));
+  const same = (i, x, y) => x < C && y < R && g[y * C + x] === g[i];
+  const u = Math.max(1, Math.max(C, R) / 10); // Beschriftungen mit der Rastergröße mitwachsen lassen
+  const P = 1.5, J = 6; // Abstand zwischen Abteilungen / Überlappung beim Verbinden
+  // Boden: im Bearbeiten-Modus Kachelraster, sonst ein Punkt pro Meter
+  let out = `<defs><pattern id="floor" width="${editMap ? S : 2 * S}" height="${editMap ? S : 2 * S}" patternUnits="userSpaceOnUse">${editMap
+      ? `<path d="M${S} 0V${S}H0" fill="none" style="stroke:var(--line)" stroke-width="${Math.min(u, 3)}"/>`
+      : `<circle cx="${S}" cy="${S}" r="${1.6 * Math.min(u, 3)}" style="fill:var(--line)"/>`}</pattern></defs>
+    <rect width="${C * S}" height="${R * S}" fill="url(#floor)"/>`;
+  // Kacheln je Abteilung in einer Gruppe sammeln, damit Überlappungen bei Transparenz keine Nähte zeigen
+  const layers = {};
+  g.forEach((k, i) => {
+    if (!k) return;
+    const cx = i % C, cy = Math.floor(i / C), x = cx * S, y = cy * S;
+    let r = `<rect x="${x + P}" y="${y + P}" width="${S - 2 * P}" height="${S - 2 * P}" rx="8"/>`;
+    // Gleichartige Nachbarfelder zu einer Fläche verschmelzen
+    if (same(i, cx + 1, cy)) r += `<rect x="${x + S - J}" y="${y + P}" width="${2 * J}" height="${S - 2 * P}"/>`;
+    if (same(i, cx, cy + 1)) r += `<rect x="${x + P}" y="${y + S - J}" width="${S - 2 * P}" height="${2 * J}"/>`;
+    if (same(i, cx + 1, cy) && same(i, cx, cy + 1) && same(i, cx + 1, cy + 1)) r += `<rect x="${x + S - J}" y="${y + S - J}" width="${2 * J}" height="${2 * J}"/>`;
+    layers[k] = (layers[k] || '') + r;
   });
-  const comps = components(m);
-  const biggest = {};
+  for (const k in layers) {
+    const active = editMap || CAT[k].special || need.has(k);
+    out += `<g fill="${CAT[k].c}" opacity="${active ? 1 : .28}">${layers[k]}</g>`;
+  }
+  const comps = components(m), biggest = {};
   comps.forEach(c => { if (!biggest[c.k] || c.cells.length > biggest[c.k].cells.length) biggest[c.k] = c; });
-  if (!editMap) {
+  const center = p => `${p.x * S + S / 2},${p.y * S + S / 2}`;
+  if (!editMap && need.size) {
     const cen = centroids(m);
-    const pts = [];
-    if (cen.entry) pts.push(cen.entry);
-    for (const g of groups) if (need.has(g.key)) pts.push(cen[g.key]);
-    if (cen.kasse && need.size) pts.push(cen.kasse);
-    if (pts.length > 1) out += `<polyline points="${pts.map(p => `${p.x * S + S / 2},${p.y * S + S / 2}`).join(' ')}" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>`;
+    const pts = [cen.entry, ...[...need.keys()].map(k => cen[k]), cen.kasse].filter(Boolean);
+    out += `<polyline points="${pts.map(center).join(' ')}" fill="none" style="stroke:var(--ink)" stroke-width="${3.5 * u}" stroke-dasharray="0 ${8 * u}" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>`;
   }
   for (const c of comps) {
-    const x = (c.label % COLS) * S, y = Math.floor(c.label / COLS) * S;
+    // Beschriftung nur für Flächen, die groß genug sind
+    if (c.cells.length < u * u / 2 && biggest[c.k] !== c) continue;
+    const mx = (c.label % C + .5) * S, my = (Math.floor(c.label / C) + .5) * S;
     const dim = !editMap && !CAT[c.k].special && !need.has(c.k);
-    out += `<text x="${x + S / 2}" y="${y + S / 2 + 7}" font-size="22" text-anchor="middle" opacity="${dim ? .35 : 1}" style="pointer-events:none">${CAT[c.k].e}</text>`;
-    const g = need.get(c.k);
-    if (!editMap && g && biggest[c.k] === c) {
-      out += `<circle cx="${x + 9}" cy="${y + 9}" r="9" fill="var(--text)"/><text x="${x + 9}" y="${y + 13}" font-size="12" font-weight="700" text-anchor="middle" fill="var(--bg)" style="pointer-events:none">${g.num}</text>`;
-      out += `<text x="${x + S - 3}" y="${y + S - 3}" font-size="11" font-weight="700" text-anchor="end" fill="#111" style="pointer-events:none">${g.open}×</text>`;
+    out += `<text x="${mx}" y="${my + 7 * u}" font-size="${20 * u}" text-anchor="middle" opacity="${dim ? .4 : 1}" pointer-events="none">${CAT[c.k].e}</text>`;
+    const gr = need.get(c.k);
+    if (!editMap && gr && biggest[c.k] === c) {
+      const bx = Math.max(11 * u, mx - 13 * u), by = Math.max(11 * u, my - 13 * u), px = mx + 13 * u, py = my + 12 * u;
+      out += `<circle cx="${bx}" cy="${by}" r="${9 * u}" style="fill:var(--ink);stroke:var(--surface)" stroke-width="${2 * u}"/>
+        <text x="${bx}" y="${by + 3.5 * u}" font-size="${10 * u}" font-weight="800" text-anchor="middle" style="fill:var(--surface)" pointer-events="none">${gr.num}</text>
+        <rect x="${px - 9 * u}" y="${py - 6.5 * u}" width="${18 * u}" height="${13 * u}" rx="${6.5 * u}" style="fill:var(--surface)"/>
+        <text x="${px}" y="${py + 3 * u}" font-size="${9 * u}" font-weight="800" text-anchor="middle" style="fill:var(--ink)" pointer-events="none">${gr.open}×</text>`;
     }
   }
   svg.innerHTML = out;
 }
 
 // ---------- Aktionen ----------
+let toastTimer;
+function toast(html) {
+  const t = $('#toast');
+  t.innerHTML = html; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
 function addItem(text) {
   text = text.trim(); if (!text) return;
-  state.items.push({ id: uid(), text, cat: guess(text), done: false });
+  const it = { id: uid(), text, cat: guess(text), done: false };
+  state.items.push(it);
   state.history.push(text);
+  if (state.history.length > 500) state.history = state.history.slice(-500);
   save(); render();
+  const c = CAT[it.cat];
+  toast(c ? `<span>${c.e} <b>${esc(text)}</b> → ${esc(c.n)}</span><button data-act="cat" data-id="${it.id}">Ändern</button>`
+          : `<span>❓ <b>${esc(text)}</b> nicht erkannt</span><button data-act="cat" data-id="${it.id}">Zuordnen</button>`);
 }
-function chooseCat(id) {
-  const it = state.items.find(i => i.id === id), dlg = $('#catDlg');
-  dlg.innerHTML = `<h3>Wo findest du „${esc(it.text)}"?</h3><div class="grid">
-    ${GOODS.map(c => `<button style="background:${c.c}" data-pick="${c.k}">${c.e} ${esc(c.n)}</button>`).join('')}</div>`;
+
+function openSheet(id) {
+  const it = state.items.find(i => i.id === id); if (!it) return;
+  const m = market(), miss = isMissing(m, it), dlg = $('#sheet');
+  dlg.innerHTML = `<div class="sheet"><div class="grab"></div><h3>${esc(it.text)}</h3><p>In welcher Abteilung findest du das?</p>
+    <div class="grid">${GOODS.map(c => `<button class="${it.cat === c.k ? 'on' : ''}" data-pick="${c.k}"><span class="sw" style="background:${c.c}">${c.e}</span>${esc(c.n)}</button>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><button class="btn grow" data-sheet="missing">${miss ? '✅ Gibt’s hier doch' : `🚫 Nicht bei ${esc(m.name)}`}</button>
+      <button class="btn danger" data-sheet="del">Löschen</button></div></div>`;
   dlg.onclick = e => {
-    const b = e.target.closest('[data-pick]');
-    if (b) {
-      it.cat = b.dataset.pick;
-      state.learned[norm(it.text)] = it.cat;
-      save(); dlg.close(); render();
-    } else if (e.target === dlg) dlg.close();
+    const p = e.target.closest('[data-pick]'), s = e.target.closest('[data-sheet]');
+    if (p) { it.cat = p.dataset.pick; state.learned[norm(it.text)] = it.cat; }
+    else if (s && s.dataset.sheet === 'missing') {
+      m.missing = m.missing || {};
+      if (miss) delete m.missing[norm(it.text)]; else m.missing[norm(it.text)] = true;
+    }
+    else if (s && s.dataset.sheet === 'del') state.items = state.items.filter(x => x !== it);
+    else { if (e.target === dlg) dlg.close(); return; }
+    save(); dlg.close(); render();
   };
+  $('#toast').classList.remove('show');
   dlg.showModal();
 }
 
+function addMarket() {
+  const nm = newMarket(`Markt ${state.markets.length + 1}`);
+  state.markets.push(nm); state.active = nm.id;
+  tab = 'map'; editMap = true;
+}
+
 document.addEventListener('submit', e => {
-  if (e.target.id === 'addForm') {
-    e.preventDefault();
-    const inp = $('#addInput'); addItem(inp.value);
-    const n = $('#addInput'); if (n) n.focus();
-  }
+  if (e.target.id !== 'addForm') return;
+  e.preventDefault();
+  addItem($('#addInput').value);
+  $('#addInput').focus();
 });
 
 document.addEventListener('click', e => {
-  const tabBtn = e.target.closest('nav button');
-  if (tabBtn) { tab = tabBtn.dataset.tab; render(); return; }
-  const b = e.target.closest('[data-act]'); if (!b) return;
+  const tb = e.target.closest('.tabs button');
+  if (tb) { tab = tb.dataset.tab; editMap = false; render(); window.scrollTo(0, 0); return; }
+  const b = e.target.closest('[data-act]'); if (!b || b.closest('dialog')) return;
   const a = b.dataset.act, id = b.dataset.id, m = market();
-  if (a === 'toggle') { const it = state.items.find(i => i.id === id); it.done = !it.done; }
-  else if (a === 'del') state.items = state.items.filter(i => i.id !== id);
-  else if (a === 'cat') return chooseCat(id);
+  if (a === 'toggle') { const it = state.items.find(i => i.id === id); if (it) it.done = !it.done; }
+  else if (a === 'cat') return openSheet(id);
+  else if (a === 'add') return addItem(b.dataset.text);
+  else if (a === 'switch') state.active = id;
   else if (a === 'clearDone') state.items = state.items.filter(i => !i.done);
   else if (a === 'toggleEdit') editMap = !editMap;
   else if (a === 'brush') brush = b.dataset.k;
-  else if (a === 'resetGrid') { if (!confirm('Grundriss auf die Vorlage zurücksetzen?')) return; m.grid = templateGrid(); }
-  else if (a === 'newMarket') { const nm = newMarket('Neuer Markt'); state.markets.push(nm); state.active = nm.id; }
+  else if (a === 'bsize') brushSize = +b.dataset.n;
+  else if (a === 'resetGrid') { if (!confirm('Grundriss auf die Vorlage zurücksetzen?')) return; m.grid = templateGrid(m.cols, m.rows); }
+  else if (a === 'newMarket') addMarket();
   else if (a === 'delMarket') {
-    if (!confirm(`„${m.name}" löschen?`)) return;
+    if (!confirm(`„${m.name}“ löschen?`)) return;
     state.markets = state.markets.filter(x => x.id !== m.id); state.active = state.markets[0].id;
   }
   save(); render();
 });
 
 document.addEventListener('change', e => {
-  if (e.target.id === 'marketSel') { state.active = e.target.value; save(); render(); }
-  else if (e.target.id === 'mName') { market().name = e.target.value.trim() || 'Supermarkt'; save(); render(); }
-  else if (e.target.dataset.act === 'toggle') { /* via click-Handler erledigt */ }
+  if (e.target.id === 'marketSel') {
+    const v = e.target.value;
+    if (v === '__new') addMarket();
+    else if (v === '__edit') { tab = 'map'; editMap = true; }
+    else state.active = v;
+    save(); render();
+  } else if (e.target.id === 'mName') {
+    market().name = e.target.value.trim() || 'Supermarkt'; save(); render();
+  } else if (e.target.id === 'mW' || e.target.id === 'mD') {
+    const m = market(), cells = v => Math.min(200, Math.max(8, Math.round((parseFloat(String(v).replace(',', '.')) || 0) / M_PER_CELL)));
+    resample(m, cells($('#mW').value), cells($('#mD').value));
+    save(); render();
+  }
 });
 
 // Malen auf der Karte
-function paintAt(e) {
-  const svg = $('#svg'), r = svg.getBoundingClientRect();
-  const x = Math.floor((e.clientX - r.left) / r.width * COLS);
-  const y = Math.floor((e.clientY - r.top) / r.height * ROWS);
-  if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return;
-  const m = market();
-  // Eingang und Kasse sind einmalig: beim Setzen das alte Feld entfernen
-  if (brush === 'entry' || brush === 'kasse') m.grid = m.grid.map(k => k === brush ? '' : k);
-  if (m.grid[idx(x, y)] !== brush) { m.grid[idx(x, y)] = brush; renderMap(); }
+function stamp(m, cx, cy, k) {
+  const o = Math.floor((brushSize - 1) / 2);
+  let changed = false;
+  for (let y = cy - o; y < cy - o + brushSize; y++) for (let x = cx - o; x < cx - o + brushSize; x++) {
+    if (x < 0 || y < 0 || x >= m.cols || y >= m.rows) continue;
+    const i = y * m.cols + x;
+    if (m.grid[i] !== k) { m.grid[i] = k; changed = true; }
+  }
+  return changed;
 }
+let mapFrame = 0;
+function paintAt(e, k) {
+  const m = market(), r = $('#svg').getBoundingClientRect();
+  const c = { x: Math.floor((e.clientX - r.left) / r.width * m.cols), y: Math.floor((e.clientY - r.top) / r.height * m.rows) };
+  // Bei schnellen Bewegungen die Lücke zum letzten Punkt mitmalen
+  const from = lastCell || c, steps = Math.max(Math.abs(c.x - from.x), Math.abs(c.y - from.y), 1);
+  let changed = false;
+  for (let s = 0; s <= steps; s++)
+    changed = stamp(m, Math.round(from.x + (c.x - from.x) * s / steps), Math.round(from.y + (c.y - from.y) * s / steps), k) || changed;
+  lastCell = c;
+  if (changed && !mapFrame) mapFrame = requestAnimationFrame(() => { mapFrame = 0; renderMap(); });
+}
+function endPaint() { if (painting) { painting = false; lastCell = null; save(); } }
 document.addEventListener('pointerdown', e => {
-  if (!editMap || !e.target.closest('#svg')) return;
-  painting = true; e.preventDefault(); paintAt(e);
+  if (!editMap || e.button === 2 || !e.target.closest('#svg')) return;
+  painting = true; lastCell = null; e.preventDefault(); paintAt(e, brush);
 });
-document.addEventListener('pointermove', e => { if (painting) { e.preventDefault(); paintAt(e); } });
-document.addEventListener('pointerup', () => { if (painting) { painting = false; save(); } });
-document.addEventListener('pointercancel', () => { painting = false; save(); });
+document.addEventListener('pointermove', e => { if (painting) { e.preventDefault(); paintAt(e, brush); } });
+document.addEventListener('pointerup', endPaint);
+document.addEventListener('pointercancel', endPaint);
+document.addEventListener('contextmenu', e => {
+  if (editMap && e.target.closest('#svg')) { e.preventDefault(); lastCell = null; paintAt(e, ''); lastCell = null; save(); }
+});
 
 render();
 </script>
