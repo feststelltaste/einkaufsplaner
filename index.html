@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2e7d32">
+<title>Einkaufsplaner</title>
+<style>
+  :root {
+    --bg: #f4f6f4; --card: #fff; --text: #1d261d; --muted: #6b786b; --line: #dde3dd;
+    --accent: #2e7d32; --accent-text: #fff; --warn: #fff3e0; --warn-line: #ffb74d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121612; --card: #1c231c; --text: #e8efe8; --muted: #93a193; --line: #2e382e;
+      --accent: #66bb6a; --accent-text: #0d1a0d; --warn: #3a2d14; --warn-line: #8a6420;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  header { position: sticky; top: 0; z-index: 5; background: var(--accent); color: var(--accent-text);
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px; display: flex; gap: 10px; align-items: center; }
+  header h1 { font-size: 18px; margin: 0; flex: 1; }
+  header select { max-width: 55%; font: inherit; padding: 6px 8px; border-radius: 8px; border: 0; }
+  main { padding: 12px 16px; max-width: 640px; margin: 0 auto; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .btn { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .btn.danger { color: #c62828; }
+  .btn.small { padding: 6px 10px; font-size: 14px; }
+  nav { position: fixed; left: 0; right: 0; bottom: 0; display: flex; background: var(--card);
+    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); z-index: 5; }
+  nav button { flex: 1; border: 0; background: none; padding: 12px 0; font-size: 15px; color: var(--muted); }
+  nav button.on { color: var(--accent); font-weight: 600; }
+  form.add { display: flex; gap: 8px; position: sticky; top: calc(54px + env(safe-area-inset-top));
+    background: var(--bg); padding: 4px 0 10px; z-index: 4; }
+  form.add input { flex: 1; font: inherit; padding: 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); min-width: 0; }
+  .group { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+  .group.unknown { background: var(--warn); border-color: var(--warn-line); }
+  .group.alldone { opacity: .55; }
+  .group h2 { margin: 0; padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--line); }
+  .num { background: var(--text); color: var(--bg); border-radius: 50%; width: 22px; height: 22px;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .hint { color: var(--muted); font-size: 12px; font-weight: 400; margin-left: auto; }
+  .item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .item:last-child { border-bottom: 0; }
+  .item input[type=checkbox] { width: 24px; height: 24px; accent-color: var(--accent); flex: none; }
+  .item .t { flex: 1; word-break: break-word; }
+  .item.done .t { text-decoration: line-through; color: var(--muted); }
+  .item .cat, .item .del { border: 0; background: none; font-size: 20px; padding: 4px 6px; }
+  .item .del { color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 12px; align-items: center; }
+  .bar input[type=text] { flex: 1; min-width: 120px; font: inherit; padding: 8px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--card); color: var(--text); }
+  svg.map { width: 100%; height: auto; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; display: block; user-select: none; -webkit-user-select: none; }
+  svg.map.edit { touch-action: none; }
+  .palette { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .palette button { border: 2px solid transparent; border-radius: 10px; padding: 6px 8px; font-size: 13px; color: #111; }
+  .palette button.on { border-color: var(--text); box-shadow: 0 0 0 2px var(--bg) inset; font-weight: 700; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; color: var(--muted); margin-top: 10px; }
+  dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--text);
+    padding: 14px; width: min(92vw, 420px); }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  dialog h3 { margin: 0 0 10px; font-size: 16px; }
+  dialog .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  dialog .grid button { border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px; color: #111; font-size: 14px; }
+  p.note { color: var(--muted); font-size: 13px; margin: 6px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛒 Einkaufsplaner</h1>
+  <select id="marketSel" aria-label="Supermarkt"></select>
+</header>
+<main id="view"></main>
+<nav>
+  <button data-tab="list">📝 Liste</button>
+  <button data-tab="map">🗺️ Markt</button>
+</nav>
+<dialog id="catDlg"></dialog>
+
+<script>
+'use strict';
+
+const COLS = 8, ROWS = 9, S = 40;
+
+// Spezielle Felder (Eingang, Kasse) + Warengruppen mit Stichwörtern für die automatische Zuordnung
+const CATS = [
+  { k: 'entry',    n: 'Eingang',          e: '🚪', c: '#cfd8dc', special: true },
+  { k: 'kasse',    n: 'Kasse',            e: '💳', c: '#b0bec5', special: true },
+  { k: 'obst',     n: 'Obst & Gemüse',    e: '🥬', c: '#a5d66f', kw: 'apfel,äpfel,banane,birne,orange,zitrone,limette,traube,erdbeere,himbeere,blaubeere,beere,kiwi,mango,ananas,melone,pfirsich,nektarine,avocado,tomate,gurke,paprika,zwiebel,knoblauch,kartoffel,karotte,möhre,salat,spinat,brokkoli,blumenkohl,zucchini,aubergine,pilz,champignon,lauch,porree,sellerie,kohl,radieschen,ingwer,kräuter,petersilie,basilikum,schnittlauch,obst,gemüse,süßkartoffel,kürbis,fenchel,mais,rucola,rote bete,frühlingszwiebel' },
+  { k: 'brot',     n: 'Brot & Backwaren', e: '🥖', c: '#e6c27a', kw: 'brot,brötchen,semmel,toast,croissant,baguette,kuchen,brezel,laugenbrezel,laugen,bäcker,vollkornbrot,aufbackbrötchen' },
+  { k: 'kuehl',    n: 'Milch & Käse',     e: '🧀', c: '#ffe082', kw: 'milch,joghurt,quark,käse,butter,sahne,ei,eier,margarine,frischkäse,mozzarella,parmesan,gouda,skyr,schmand,creme fraiche,crème fraîche,pudding,kefir,hafermilch,sojamilch,tofu,feta,halloumi,buttermilch,hüttenkäse,joghurt' },
+  { k: 'fleisch',  n: 'Fleisch & Wurst',  e: '🥩', c: '#f19a9a', kw: 'fleisch,hack,hackfleisch,hähnchen,huhn,pute,schnitzel,steak,wurst,schinken,salami,speck,bratwurst,würstchen,lachs,fisch,garnelen,aufschnitt,leberkäse,gyros,rind,schwein,leberwurst,mett,forelle' },
+  { k: 'tk',       n: 'Tiefkühl',         e: '🧊', c: '#9ad7f0', kw: 'tiefkühl,tk,pizza,eis,eiscreme,pommes,fischstäbchen,tiefkühlpizza,rahmspinat,gefrorene,blattspinat,nuggets' },
+  { k: 'getraenke',n: 'Getränke',         e: '🥤', c: '#80cbc4', kw: 'wasser,saft,cola,limo,limonade,bier,wein,sekt,tee,kaffee,apfelschorle,schorle,mineralwasser,sprudel,energy,spezi,fanta,sprite,whisky,gin,vodka,prosecco,rotwein,weißwein,orangensaft,eistee,kakao' },
+  { k: 'trocken',  n: 'Nudeln & Konserven',e:'🍝', c: '#ffb878', kw: 'nudeln,pasta,spaghetti,reis,mehl,zucker,salz,öl,olivenöl,essig,konserve,dose,dosen,dosentomaten,passierte tomaten,tomatenmark,müsli,haferflocken,cornflakes,linsen,bohnen,kichererbsen,thunfisch,suppe,soße,sauce,ketchup,senf,mayo,mayonnaise,gewürz,marmelade,honig,nutella,couscous,brühe,backpulver,hefe,pesto,sonnenblumenöl,bulgur,maisdose,erdnussbutter,rapsöl' },
+  { k: 'suess',    n: 'Süßes & Snacks',   e: '🍫', c: '#d1a3e8', kw: 'schokolade,chips,kartoffelchips,kekse,gummibärchen,bonbon,riegel,süßigkeiten,snack,erdnüsse,nüsse,popcorn,salzstangen,lakritz,waffeln,kaugummi,pralinen,cracker,müsliriegel,haribo' },
+  { k: 'drogerie', n: 'Drogerie',         e: '🧴', c: '#f4a6c8', kw: 'zahnpasta,zahnbürste,shampoo,duschgel,seife,deo,tampons,binden,wattepads,creme,rasierer,taschentücher,windeln,haarspray,mundwasser,sonnencreme,handcreme,zahnseide,spülung,pflaster' },
+  { k: 'haushalt', n: 'Haushalt',         e: '🧽', c: '#b7c0f0', kw: 'spülmittel,waschmittel,klopapier,toilettenpapier,küchenrolle,müllbeutel,müllsack,schwamm,putzmittel,reiniger,alufolie,backpapier,gefrierbeutel,batterien,glühbirne,kerzen,servietten,spülmaschinentabs,tabs,weichspüler,frischhaltefolie,tüten' },
+];
+const CAT = Object.fromEntries(CATS.map(c => [c.k, c]));
+const GOODS = CATS.filter(c => !c.special);
+
+const LETTER = { O:'obst', B:'brot', M:'kuehl', F:'fleisch', T:'tk', G:'getraenke', N:'trocken', S:'suess', D:'drogerie', H:'haushalt', E:'entry', K:'kasse' };
+const TEMPLATE = [
+  'OOOBBBBB',
+  '........',
+  'NN.MM.TT',
+  'NN.MM.TT',
+  'SS.MM.GG',
+  'SS.FF.GG',
+  'HH.FF.DD',
+  '........',
+  'KK....EE',
+];
+const templateGrid = () => TEMPLATE.join('').split('').map(ch => LETTER[ch] || '');
+
+// ---------- Zustand ----------
+const KEY = 'einkaufsplaner.v1';
+const uid = () => Math.random().toString(36).slice(2, 9);
+let state = load();
+let tab = 'list';
+let editMap = false;
+let brush = 'obst';
+let painting = false;
+
+function newMarket(name) { return { id: uid(), name, grid: templateGrid() }; }
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.markets && s.markets.length) return s;
+  } catch (e) {}
+  const m = newMarket('Mein Supermarkt');
+  return { markets: [m], active: m.id, items: [], learned: {}, history: [] };
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+const market = () => state.markets.find(m => m.id === state.active) || state.markets[0];
+
+// ---------- Zuordnung ----------
+const tokens = t => t.toLowerCase().split(/[^a-zäöüß]+/).filter(Boolean);
+const norm = t => tokens(t).join(' ');
+
+function guess(text) {
+  const n = norm(text);
+  if (state.learned[n]) return state.learned[n];
+  const toks = tokens(text);
+  let best = '', bestLen = 0;
+  for (const c of GOODS) {
+    for (const kw of c.kw.split(',')) {
+      const k = kw.toLowerCase();
+      const hit = k.includes(' ') ? n.includes(k)
+        : toks.some(t => t === k || (k.length >= 4 && t.includes(k)));
+      if (hit && k.length > bestLen) { best = c.k; bestLen = k.length; }
+    }
+  }
+  return best; // '' = unbekannt
+}
+
+// ---------- Karte / Route ----------
+const idx = (x, y) => y * COLS + x;
+function centroids(m) {
+  const acc = {};
+  m.grid.forEach((k, i) => {
+    if (!k) return;
+    const a = acc[k] || (acc[k] = { x: 0, y: 0, n: 0 });
+    a.x += i % COLS; a.y += Math.floor(i / COLS); a.n++;
+  });
+  for (const k in acc) { acc[k].x /= acc[k].n; acc[k].y /= acc[k].n; }
+  return acc;
+}
+// Stabile Laufreihenfolge: vom Eingang immer zur nächstgelegenen Warengruppe, Kasse zuletzt
+function computeRoute(m) {
+  const c = centroids(m);
+  let pos = c.entry || { x: COLS - 1, y: ROWS - 1 };
+  const left = Object.keys(c).filter(k => !CAT[k].special);
+  const order = [];
+  while (left.length) {
+    let bi = 0, bd = Infinity;
+    left.forEach((k, i) => {
+      const d = Math.abs(c[k].x - pos.x) + Math.abs(c[k].y - pos.y);
+      if (d < bd) { bd = d; bi = i; }
+    });
+    const k = left.splice(bi, 1)[0];
+    order.push(k); pos = c[k];
+  }
+  return order;
+}
+// Zusammenhängende Flächen je Warengruppe (für Beschriftung)
+function components(m) {
+  const seen = new Array(m.grid.length).fill(false), out = [];
+  m.grid.forEach((k, i) => {
+    if (!k || seen[i]) return;
+    const cells = [], stack = [i]; seen[i] = true;
+    while (stack.length) {
+      const j = stack.pop(); cells.push(j);
+      const x = j % COLS, y = Math.floor(j / COLS);
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+        const nj = idx(nx, ny);
+        if (!seen[nj] && m.grid[nj] === k) { seen[nj] = true; stack.push(nj); }
+      }
+    }
+    const cx = cells.reduce((a, j) => a + j % COLS, 0) / cells.length;
+    const cy = cells.reduce((a, j) => a + Math.floor(j / COLS), 0) / cells.length;
+    const label = cells.reduce((b, j) => {
+      const d = Math.hypot(j % COLS - cx, Math.floor(j / COLS) - cy);
+      return d < b.d ? { j, d } : b;
+    }, { j: cells[0], d: Infinity }).j;
+    out.push({ k, cells, label });
+  });
+  return out;
+}
+
+// Einkaufsplan: Gruppen in Laufreihenfolge
+function plan() {
+  const m = market(), route = computeRoute(m), mapped = new Set(route);
+  const groups = [];
+  const items = state.items;
+  const unknown = items.filter(i => !i.cat);
+  if (unknown.length) groups.push({ key: '?', unknown: true, items: unknown });
+  for (const k of route) {
+    const its = items.filter(i => i.cat === k);
+    if (its.length) groups.push({ key: k, items: its });
+  }
+  const unplaced = items.filter(i => i.cat && !mapped.has(i.cat));
+  const byCat = {};
+  unplaced.forEach(i => (byCat[i.cat] = byCat[i.cat] || []).push(i));
+  for (const k in byCat) groups.push({ key: k, unplaced: true, items: byCat[k] });
+  let n = 0;
+  groups.forEach(g => {
+    g.open = g.items.filter(i => !i.done).length;
+    if (!g.unknown && !g.unplaced && g.open) g.num = ++n;
+  });
+  return groups;
+}
+
+// ---------- Rendering ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+function render() {
+  const sel = $('#marketSel');
+  sel.innerHTML = state.markets.map(m => `<option value="${m.id}" ${m.id === market().id ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#view').innerHTML = tab === 'list' ? listHtml() : mapHtml();
+  if (tab === 'map') renderMap();
+}
+
+function listHtml() {
+  const groups = plan();
+  const hist = [...new Set(state.history)].slice(-200).map(h => `<option value="${esc(h)}">`).join('');
+  let h = `<form class="add" id="addForm">
+    <input id="addInput" list="hist" placeholder="Artikel hinzufügen …" autocomplete="off" autocapitalize="sentences" enterkeyhint="done">
+    <datalist id="hist">${hist}</datalist>
+    <button class="btn primary" type="submit">＋</button></form>`;
+  if (!state.items.length) {
+    return h + `<div class="empty">Noch nichts auf der Liste.<br>Tippe oben einfach einen Artikel ein – die Warengruppe wird automatisch erkannt und nach Laufweg im Markt sortiert.</div>`;
+  }
+  for (const g of groups) {
+    const c = CAT[g.key];
+    const title = g.unknown ? '❓ Nicht zugeordnet' : `${c.e} ${esc(c.n)}`;
+    const hint = g.unknown ? 'Tippe auf ❓, um zuzuordnen' : g.unplaced ? 'im Markt nicht eingezeichnet' : '';
+    const sorted = [...g.items].sort((a, b) => a.done - b.done);
+    h += `<section class="group ${g.unknown ? 'unknown' : ''} ${!g.open ? 'alldone' : ''}">
+      <h2>${g.num ? `<span class="num">${g.num}</span>` : ''}${title}<span class="hint">${hint}</span></h2>
+      ${sorted.map(i => `<div class="item ${i.done ? 'done' : ''}">
+        <input type="checkbox" data-act="toggle" data-id="${i.id}" ${i.done ? 'checked' : ''} aria-label="erledigt">
+        <span class="t">${esc(i.text)}</span>
+        <button class="cat" data-act="cat" data-id="${i.id}" aria-label="Warengruppe ändern">${i.cat ? CAT[i.cat].e : '❓'}</button>
+        <button class="del" data-act="del" data-id="${i.id}" aria-label="löschen">✕</button>
+      </div>`).join('')}
+    </section>`;
+  }
+  if (state.items.some(i => i.done)) h += `<div class="bar"><button class="btn small" data-act="clearDone">✔ Erledigte entfernen</button></div>`;
+  return h;
+}
+
+function mapHtml() {
+  const m = market();
+  let h = `<div class="bar">
+    <button class="btn small ${editMap ? 'primary' : ''}" data-act="toggleEdit">${editMap ? '✔ Fertig' : '✏️ Markt bearbeiten'}</button></div>`;
+  if (editMap) {
+    h += `<div class="bar"><input type="text" id="mName" value="${esc(m.name)}" aria-label="Name des Marktes">
+      <button class="btn small" data-act="newMarket">＋ Neuer Markt</button>
+      <button class="btn small" data-act="resetGrid">↺ Vorlage</button>
+      ${state.markets.length > 1 ? '<button class="btn small danger" data-act="delMarket">🗑</button>' : ''}</div>
+      <p class="note">Wähle eine Abteilung und streiche über die Felder, um den Grundriss von oben zu malen. Leere Felder sind Gänge. Die Laufreihenfolge wird aus der Lage zum Eingang berechnet.</p>
+      <div class="palette">${CATS.map(c => `<button data-act="brush" data-k="${c.k}" class="${brush === c.k ? 'on' : ''}" style="background:${c.c}">${c.e} ${esc(c.n)}</button>`).join('')}
+      <button data-act="brush" data-k="" class="${brush === '' ? 'on' : ''}" style="background:#eee">🧹 Gang</button></div>`;
+  }
+  h += `<svg class="map ${editMap ? 'edit' : ''}" id="svg" viewBox="0 0 ${COLS * S} ${ROWS * S}"></svg>`;
+  if (!editMap) h += `<div class="legend"><span>Farbig = hier brauchst du etwas</span><span>Zahl = Reihenfolge</span><span>Gestrichelt = Laufweg</span></div>`;
+  return h;
+}
+
+function renderMap() {
+  const svg = $('#svg'); if (!svg) return;
+  const m = market(), groups = plan();
+  const need = new Map(groups.filter(g => !g.unknown && !g.unplaced && g.open).map(g => [g.key, g]));
+  let out = '';
+  m.grid.forEach((k, i) => {
+    const x = (i % COLS) * S, y = Math.floor(i / COLS) * S;
+    if (!k) { out += `<rect x="${x}" y="${y}" width="${S}" height="${S}" fill="none" stroke="var(--line)" stroke-width=".5"/>`; return; }
+    const active = editMap || CAT[k].special || need.has(k);
+    out += `<rect x="${x}" y="${y}" width="${S}" height="${S}" fill="${CAT[k].c}" opacity="${active ? 1 : .22}" stroke="var(--card)" stroke-width="1"/>`;
+  });
+  const comps = components(m);
+  const biggest = {};
+  comps.forEach(c => { if (!biggest[c.k] || c.cells.length > biggest[c.k].cells.length) biggest[c.k] = c; });
+  if (!editMap) {
+    const cen = centroids(m);
+    const pts = [];
+    if (cen.entry) pts.push(cen.entry);
+    for (const g of groups) if (need.has(g.key)) pts.push(cen[g.key]);
+    if (cen.kasse && need.size) pts.push(cen.kasse);
+    if (pts.length > 1) out += `<polyline points="${pts.map(p => `${p.x * S + S / 2},${p.y * S + S / 2}`).join(' ')}" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>`;
+  }
+  for (const c of comps) {
+    const x = (c.label % COLS) * S, y = Math.floor(c.label / COLS) * S;
+    const dim = !editMap && !CAT[c.k].special && !need.has(c.k);
+    out += `<text x="${x + S / 2}" y="${y + S / 2 + 7}" font-size="22" text-anchor="middle" opacity="${dim ? .35 : 1}" style="pointer-events:none">${CAT[c.k].e}</text>`;
+    const g = need.get(c.k);
+    if (!editMap && g && biggest[c.k] === c) {
+      out += `<circle cx="${x + 9}" cy="${y + 9}" r="9" fill="var(--text)"/><text x="${x + 9}" y="${y + 13}" font-size="12" font-weight="700" text-anchor="middle" fill="var(--bg)" style="pointer-events:none">${g.num}</text>`;
+      out += `<text x="${x + S - 3}" y="${y + S - 3}" font-size="11" font-weight="700" text-anchor="end" fill="#111" style="pointer-events:none">${g.open}×</text>`;
+    }
+  }
+  svg.innerHTML = out;
+}
+
+// ---------- Aktionen ----------
+function addItem(text) {
+  text = text.trim(); if (!text) return;
+  state.items.push({ id: uid(), text, cat: guess(text), done: false });
+  state.history.push(text);
+  save(); render();
+}
+function chooseCat(id) {
+  const it = state.items.find(i => i.id === id), dlg = $('#catDlg');
+  dlg.innerHTML = `<h3>Wo findest du „${esc(it.text)}"?</h3><div class="grid">
+    ${GOODS.map(c => `<button style="background:${c.c}" data-pick="${c.k}">${c.e} ${esc(c.n)}</button>`).join('')}</div>`;
+  dlg.onclick = e => {
+    const b = e.target.closest('[data-pick]');
+    if (b) {
+      it.cat = b.dataset.pick;
+      state.learned[norm(it.text)] = it.cat;
+      save(); dlg.close(); render();
+    } else if (e.target === dlg) dlg.close();
+  };
+  dlg.showModal();
+}
+
+document.addEventListener('submit', e => {
+  if (e.target.id === 'addForm') {
+    e.preventDefault();
+    const inp = $('#addInput'); addItem(inp.value);
+    const n = $('#addInput'); if (n) n.focus();
+  }
+});
+
+document.addEventListener('click', e => {
+  const tabBtn = e.target.closest('nav button');
+  if (tabBtn) { tab = tabBtn.dataset.tab; render(); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, id = b.dataset.id, m = market();
+  if (a === 'toggle') { const it = state.items.find(i => i.id === id); it.done = !it.done; }
+  else if (a === 'del') state.items = state.items.filter(i => i.id !== id);
+  else if (a === 'cat') return chooseCat(id);
+  else if (a === 'clearDone') state.items = state.items.filter(i => !i.done);
+  else if (a === 'toggleEdit') editMap = !editMap;
+  else if (a === 'brush') brush = b.dataset.k;
+  else if (a === 'resetGrid') { if (!confirm('Grundriss auf die Vorlage zurücksetzen?')) return; m.grid = templateGrid(); }
+  else if (a === 'newMarket') { const nm = newMarket('Neuer Markt'); state.markets.push(nm); state.active = nm.id; }
+  else if (a === 'delMarket') {
+    if (!confirm(`„${m.name}" löschen?`)) return;
+    state.markets = state.markets.filter(x => x.id !== m.id); state.active = state.markets[0].id;
+  }
+  save(); render();
+});
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'marketSel') { state.active = e.target.value; save(); render(); }
+  else if (e.target.id === 'mName') { market().name = e.target.value.trim() || 'Supermarkt'; save(); render(); }
+  else if (e.target.dataset.act === 'toggle') { /* via click-Handler erledigt */ }
+});
+
+// Malen auf der Karte
+function paintAt(e) {
+  const svg = $('#svg'), r = svg.getBoundingClientRect();
+  const x = Math.floor((e.clientX - r.left) / r.width * COLS);
+  const y = Math.floor((e.clientY - r.top) / r.height * ROWS);
+  if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return;
+  const m = market();
+  // Eingang und Kasse sind einmalig: beim Setzen das alte Feld entfernen
+  if (brush === 'entry' || brush === 'kasse') m.grid = m.grid.map(k => k === brush ? '' : k);
+  if (m.grid[idx(x, y)] !== brush) { m.grid[idx(x, y)] = brush; renderMap(); }
+}
+document.addEventListener('pointerdown', e => {
+  if (!editMap || !e.target.closest('#svg')) return;
+  painting = true; e.preventDefault(); paintAt(e);
+});
+document.addEventListener('pointermove', e => { if (painting) { e.preventDefault(); paintAt(e); } });
+document.addEventListener('pointerup', () => { if (painting) { painting = false; save(); } });
+document.addEventListener('pointercancel', () => { painting = false; save(); });
+
+render();
+</script>
+</body>
+</html>
